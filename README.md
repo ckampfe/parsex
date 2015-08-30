@@ -10,4 +10,4 @@ A little parser combinator library
 - or
 - regex
 
-See `test/parsex_parsers_test.exs` for examples.
+See `test/parsex_test.exs` for examples.
