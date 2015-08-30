@@ -1,11 +1,20 @@
 defmodule Parsex do
+  @moduledoc """
+  Parser combinator functions.
+  """
 
   @type parser :: (... -> {:ok, String.t} | {:error, String.t})
 
+  @doc """
   ######################
   ### STRING LITERAL ###
   ######################
 
+  Creates a parser from a `String` literal that succeeds if the
+  given string forms the prefix of the input.
+
+  Input is stripped of leading spaces before match.
+  """
   @spec lit(String.t) :: parser
   def lit(literal) do
     fn input ->
@@ -20,10 +29,16 @@ defmodule Parsex do
     end
   end
 
+  @doc """
   #############
   ### REGEX ###
   #############
 
+  Creates a parser from a Regex literal that succeeds if the
+  given regular expression matches.
+
+  Input is stripped of leading spaces before match
+  """
   @spec pregex(Regex.t) :: parser
   def pregex(regex) do
     fn input ->
@@ -44,10 +59,14 @@ defmodule Parsex do
     end
   end
 
+  @doc """
   ##########
   ### OR ###
   ##########
 
+  Creates a logical `OR` parser from a collection of other parsers.
+  This parser will succeed if at least one of its given parsers succeeds.
+  """
   @spec por([parser]) :: parser
   def por(parsers) do
     fn input ->
@@ -76,10 +95,14 @@ defmodule Parsex do
     end
   end
 
+  @doc """
   ###########
   ### AND ###
   ###########
 
+  Creates a logical `AND` parser from a collection of other parsers.
+  This parser will succeed if and only if all of its given parsers succeeds.
+  """
   @spec pand([parser]) :: parser
   def pand(parsers) do
     fn input ->
@@ -122,6 +145,12 @@ defmodule Parsex do
       {:error, e} -> {:error, e}
     end
   end
+
+  @doc """
+  #################
+  ### UTILITIES ###
+  #################
+  """
   defp pad(match, input, stripped_input) do
     pad_size = String.length(match) + String.length(input) - String.length(stripped_input)
     String.rjust(match, pad_size)
