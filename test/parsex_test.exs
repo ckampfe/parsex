@@ -3,18 +3,23 @@ defmodule ParsexTest do
   import Parsex
 
   test "string literal parsing" do
-    assert({:ok, ""} = lit("foo").("foo"))
+    assert({:ok, "", "foo"} = lit("foo").("foo"))
     assert({:error, _} = lit("foo").("bar"))
-    assert({:ok, " again"} = lit("we shall meet").("we shall meet again"))
+    assert(
+      {:ok, " again", "we shall meet"} = lit("we shall meet").("we shall meet again")
+    )
   end
 
   test "regex parsing" do
-    assert({:ok, ""} = pregex(~r/^\w{3} as easy as \d{3}/).("abc as easy as 123"))
+    assert(
+      {:ok, "", "abc as easy as 123"} =
+        pregex(~r/^\w{3} as easy as \d{3}/).("abc as easy as 123")
+    )
   end
 
   test "or parsing" do
     assert(
-      {:ok, ""} = por(
+      {:ok, "", "baz"} = por(
         [
           lit("foo"),
           lit("bar"),
@@ -36,7 +41,7 @@ defmodule ParsexTest do
 
   test "and parsing" do
     assert(
-      {:ok, ""} = pand(
+      {:ok, "", "foo bar"} = pand(
         [
           lit("foo"),
           lit("bar")
@@ -46,7 +51,7 @@ defmodule ParsexTest do
 
     # completely parses given input
     assert(
-      {:ok, ""} = pand(
+      {:ok, "", "foo bar baz quux"} = pand(
         [
           lit("foo"),
           pand([lit("bar"), lit("baz"), lit("quux")])
@@ -56,7 +61,7 @@ defmodule ParsexTest do
 
     # successfully parses, leaving some string leftover
     assert(
-      {:ok, " quux"} = pand(
+      {:ok, " quux", "foo bar baz"} = pand(
         [
           lit("foo"),
           pand([lit("bar"), lit("baz")])

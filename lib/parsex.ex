@@ -7,14 +7,15 @@ defmodule Parsex do
   ######################
 
   @spec lit(String.t) :: parser
-  def lit(lit) do
+  def lit(literal) do
     fn input ->
-      if String.lstrip(input) |> String.starts_with?(lit) do
-        lit_size = byte_size(lit)
-        << _ :: binary-size(lit_size), rest :: binary >> = String.lstrip(input)
-        {:ok, rest}
+      if String.lstrip(input) |> String.starts_with?(literal) do
+        literal_size = byte_size(literal)
+        << _ :: binary-size(literal_size), rest :: binary >> = String.lstrip(input)
+
+        {:ok, rest, pad(literal, input, String.lstrip(input))}
       else
-        {:error, "lit '#{lit}' did not match"}
+        {:error, "literal '#{literal}' did not match"}
       end
     end
   end
@@ -27,9 +28,16 @@ defmodule Parsex do
   def pregex(regex) do
     fn input ->
       if Regex.match?(regex, String.lstrip(input)) do
-        # replace with nothing, so return remaining
+        result = Regex.run(regex, String.lstrip(input))
+
+        # removes the result from the input
         remaining_input = Regex.replace(regex, String.lstrip(input), "")
-        {:ok, remaining_input}
+
+        {
+          :ok,
+          remaining_input,
+          result |> Enum.fetch!(0) |> pad(input, String.lstrip(input))
+        }
       else
         {:error, "Regex does not match"}
       end
@@ -82,21 +90,40 @@ defmodule Parsex do
   # initial
   defp do_pand(parsers, input) do
     [parser|remaining_parsers] = parsers
-    do_pand(parser, remaining_parsers, input)
+    do_pand(parser, remaining_parsers, input, "")
   end
 
   # final
-  defp do_pand(parser, [], input) do
-    parser.(input)
+  defp do_pand(parser, [], input, previous_result) do
+    parse_result = parser.(input)
+    case parse_result do
+      {:ok, remaining, new_result} ->
+        {
+          :ok,
+          remaining,
+          previous_result <> new_result
+        }
+      _ -> parse_result
+    end
   end
 
   # build
-  defp do_pand(parser, parsers, input) do
+  defp do_pand(parser, parsers, input, previous_result) do
     case parser.(input) do
-      {:ok, remaining_input} ->
+      {:ok, remaining_input, new_result} ->
         [next_parser|remaining_parsers] = parsers
-        do_pand(next_parser, remaining_parsers, remaining_input)
+
+        do_pand(
+          next_parser,
+          remaining_parsers,
+          remaining_input,
+          previous_result <> new_result
+        )
       {:error, e} -> {:error, e}
     end
+  end
+  defp pad(match, input, stripped_input) do
+    pad_size = String.length(match) + String.length(input) - String.length(stripped_input)
+    String.rjust(match, pad_size)
   end
 end
