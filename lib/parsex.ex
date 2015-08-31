@@ -170,6 +170,21 @@ defmodule Parsex do
       end
     end
   end
+
+  @doc """
+  ###############
+  ### REPLACE ###
+  ###############
+
+  Creates a parser from a given parser and a given replacement value.
+  Returns the replacement value in place of the result of the given parser.
+  """
+  @spec replace(parser, term) :: parser
+  def replace(parser, replacement) do
+    and_then(parser, fn _original_value -> to_string(replacement) end)
+  end
+
+  @doc """
   #################
   ### UTILITIES ###
   #################

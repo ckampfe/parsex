@@ -94,4 +94,26 @@ defmodule ParsexTest do
       ).("foo bar baz quux")
     )
   end
+
+  test "replace parsing" do
+    assert(
+      {:ok, "", "han shot not even close to first"} = replace(
+         lit("han shot first"),
+         "han shot not even close to first"
+      ).("han shot first")
+    )
+
+    assert(
+      {:ok, "", "the year of our dark lord 2015"} = pand(
+        [
+          replace(lit("the year of our lord"), "the year of our dark lord"),
+          replace(lit("1776"), "2015")
+        ]
+      ).("the year of our lord 1776")
+    )
+
+    assert(
+      {:ok, "", "bar"} = replace(lit("foo"), :bar).("foo")
+    )
+  end
 end
