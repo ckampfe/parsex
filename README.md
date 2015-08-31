@@ -6,8 +6,10 @@ A little parser combinator library
 # Combinators
 
 - string literal
-- and
-- or
 - regex
+- or
+- and
+- and then
+- replace
 
 See `test/parsex_test.exs` for examples.
