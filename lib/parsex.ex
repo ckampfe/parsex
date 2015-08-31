@@ -22,7 +22,7 @@ defmodule Parsex do
         literal_size = byte_size(literal)
         << _ :: binary-size(literal_size), rest :: binary >> = String.lstrip(input)
 
-        {:ok, rest, pad(literal, input, String.lstrip(input))}
+        {:ok, rest, pad(literal, input)}
       else
         {:error, "literal '#{literal}' did not match"}
       end
@@ -51,7 +51,7 @@ defmodule Parsex do
         {
           :ok,
           remaining_input,
-          result |> Enum.fetch!(0) |> pad(input, String.lstrip(input))
+          result |> Enum.fetch!(0) |> pad(input)
         }
       else
         {:error, "Regex does not match"}
@@ -151,8 +151,10 @@ defmodule Parsex do
   ### UTILITIES ###
   #################
   """
-  defp pad(match, input, stripped_input) do
-    pad_size = String.length(match) + String.length(input) - String.length(stripped_input)
+  defp pad(match, original_input) do
+    stripped_input = String.lstrip(original_input)
+    pad_size =
+      String.length(match) + String.length(original_input) - String.length(stripped_input)
     String.rjust(match, pad_size)
   end
 end
