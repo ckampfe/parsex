@@ -2,7 +2,7 @@ defmodule ParsexTest do
   use ExUnit.Case, async: true
   import Parsex
 
-  test "string literal parsing" do
+  test "lit/1 string literal parsing" do
     assert({:ok, "", "foo"} = lit("foo").("foo"))
     assert({:error, _} = lit("foo").("bar"))
     assert(
@@ -10,14 +10,14 @@ defmodule ParsexTest do
     )
   end
 
-  test "regex parsing" do
+  test "pregex/1 regex parsing" do
     assert(
       {:ok, "", "abc as easy as 123"} =
         pregex(~r/^\w{3} as easy as \d{3}/).("abc as easy as 123")
     )
   end
 
-  test "or parsing" do
+  test "por/2 or parsing" do
     assert(
       {:ok, "", "baz"} = por(
         [
@@ -39,7 +39,7 @@ defmodule ParsexTest do
     )
   end
 
-  test "and parsing" do
+  test "pand/2 and parsing" do
     assert(
       {:ok, "", "foo bar"} = pand(
         [
@@ -80,7 +80,7 @@ defmodule ParsexTest do
     )
   end
 
-  test "and_then parsing" do
+  test "and_then/2 and_then parsing" do
     assert(
       {:ok, "", "foo bar baz quuxquuxquux"} = pand(
          [
@@ -95,7 +95,7 @@ defmodule ParsexTest do
     )
   end
 
-  test "replace parsing" do
+  test "replace/2 replace parsing" do
     assert(
       {:ok, "", "han shot not even close to first"} = replace(
          lit("han shot first"),
