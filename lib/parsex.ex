@@ -147,6 +147,29 @@ defmodule Parsex do
   end
 
   @doc """
+  ################
+  ### AND THEN ###
+  ################
+
+  Creates a parser from a given parser and a given function.
+  Applies the function to the result of the given parser and
+  returns the result.
+  """
+  @spec and_then(parser, (... -> String.t)) :: parser
+  def and_then(parser, fun) do
+    fn input ->
+      case parser.(input) do
+        {:ok, remaining_input, parse_result} ->
+          transformed = fun.(String.lstrip(parse_result))
+          {
+            :ok,
+            remaining_input,
+            pad(transformed, input)
+          }
+        {:error, e} -> {:error, e}
+      end
+    end
+  end
   #################
   ### UTILITIES ###
   #################

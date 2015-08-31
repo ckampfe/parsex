@@ -79,4 +79,19 @@ defmodule ParsexTest do
       ).("foo bar")
     )
   end
+
+  test "and_then parsing" do
+    assert(
+      {:ok, "", "foo bar baz quuxquuxquux"} = pand(
+         [
+           lit("foo"),
+           pand([lit("bar"), lit("baz")]),
+           and_then(
+             lit("quux"),
+             fn value -> value <> value <> value end
+           )
+         ]
+      ).("foo bar baz quux")
+    )
+  end
 end
