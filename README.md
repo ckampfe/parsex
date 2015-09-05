@@ -9,6 +9,8 @@ A little parser combinator library
 - regex
 - or
 - and
+- and (keep first)
+- and (keep last)
 - and then
 - replace
 
