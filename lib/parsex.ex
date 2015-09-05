@@ -89,7 +89,7 @@ defmodule Parsex do
   defp do_por(parser, parsers, input) do
     case parser.(input) do
       {:ok, remaining_input} -> {:ok, remaining_input}
-      {:error, _e} ->
+      _ ->
         [next_parser|remaining_parsers] = parsers
         do_por(next_parser, remaining_parsers, input)
     end
@@ -126,7 +126,7 @@ defmodule Parsex do
           remaining,
           previous_result <> new_result
         }
-      _ -> parse_result
+      e -> e
     end
   end
 
@@ -142,7 +142,7 @@ defmodule Parsex do
           remaining_input,
           previous_result <> new_result
         )
-      {:error, e} -> {:error, e}
+      e -> e
     end
   end
 
@@ -198,7 +198,7 @@ defmodule Parsex do
             remaining_input,
             pad(transformed, input)
           }
-        {:error, e} -> {:error, e}
+        e -> e
       end
     end
   end
