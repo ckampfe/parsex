@@ -162,6 +162,24 @@ defmodule Parsex do
   end
 
   @doc """
+  #####################
+  ### AND KEEP LAST ###
+  #####################
+
+  Creates a logical `AND` parser from a collection of other parsers.
+  In the case of a success, this parser will return only the result of
+  the last given parser.
+  """
+  @spec and_keep_last([parser]) :: parser
+  def and_keep_last(parsers) do
+    parsers
+    |> Enum.reverse
+    |> do_and_keep
+    |> Enum.reverse
+    |> pand
+  end
+
+  @doc """
   ################
   ### AND THEN ###
   ################
@@ -204,6 +222,15 @@ defmodule Parsex do
   ### UTILITIES ###
   #################
   """
+  defp do_and_keep([first_parser|rest_of_parsers]) do
+    fp = fn input ->
+      {:ok, rem, res} = first_parser.(input)
+      {:ok, rem, res |> String.lstrip}
+    end
+
+    [fp|for parser <- rest_of_parsers, do: replace(parser, "")]
+  end
+
   defp pad(match, original_input) do
     if (match == "") do
       match

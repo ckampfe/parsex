@@ -97,6 +97,33 @@ defmodule ParsexTest do
     )
   end
 
+  test "and_keep_last/1 and_keep_last parsing" do
+    assert(
+      {:ok, "", "ahhh"} = and_keep_last(
+         [
+           lit("one"),
+           lit("day"),
+           lit("son"),
+           lit("this"),
+           lit("will"),
+           lit("all"),
+           lit("be"),
+           lit("ahhh")
+         ]
+      ).("one day son this will all be ahhh")
+    )
+
+    assert(
+      {:ok, "", "trailing whitespace "} = and_keep_last(
+         [
+           lit("should"),
+           lit("leave"),
+           lit("trailing whitespace ")
+         ]
+      ).("should leave trailing whitespace ")
+    )
+  end
+
   test "and_then/2 and_then parsing" do
     assert(
       {:ok, "", "foo bar baz quuxquuxquux"} = pand(
