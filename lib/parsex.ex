@@ -147,6 +147,21 @@ defmodule Parsex do
   end
 
   @doc """
+  ######################
+  ### AND KEEP FIRST ###
+  ######################
+
+  Creates a logical `AND` parser from a collection of other parsers.
+  In the case of a success, this parser will return only the result of
+  the first given parser.
+  """
+  @spec and_keep_first([parser]) :: parser
+  def and_keep_first(parsers) do
+    [first|rest] = parsers
+    pand([first|for parser <- rest, do: replace(parser, "")])
+  end
+
+  @doc """
   ################
   ### AND THEN ###
   ################
@@ -190,9 +205,13 @@ defmodule Parsex do
   #################
   """
   defp pad(match, original_input) do
-    stripped_input = String.lstrip(original_input)
-    pad_size =
-      String.length(match) + String.length(original_input) - String.length(stripped_input)
-    String.rjust(match, pad_size)
+    if (match == "") do
+      match
+    else
+      stripped_input = String.lstrip(original_input)
+      pad_size =
+        String.length(match) + String.length(original_input) - String.length(stripped_input)
+      String.rjust(match, pad_size)
+    end
   end
 end

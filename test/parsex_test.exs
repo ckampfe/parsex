@@ -80,6 +80,23 @@ defmodule ParsexTest do
     )
   end
 
+  test "and_keep_first/1 and_keep_first parsing" do
+    assert(
+      {:ok, "", "one"} = and_keep_first(
+         [
+           lit("one"),
+           lit("day"),
+           lit("son"),
+           lit("this"),
+           lit("will"),
+           lit("all"),
+           lit("be"),
+           lit("yours")
+         ]
+      ).("one day son this will all be yours")
+    )
+  end
+
   test "and_then/2 and_then parsing" do
     assert(
       {:ok, "", "foo bar baz quuxquuxquux"} = pand(
