@@ -157,8 +157,7 @@ defmodule Parsex do
   """
   @spec and_keep_first([parser]) :: parser
   def and_keep_first(parsers) do
-    [first|rest] = parsers
-    pand([first|for parser <- rest, do: replace(parser, "")])
+    parsers |> do_and_keep |> pand
   end
 
   @doc """
