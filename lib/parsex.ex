@@ -54,7 +54,7 @@ defmodule Parsex do
           result |> Enum.fetch!(0) |> pad(input)
         }
       else
-        {:error, "Regex does not match"}
+        {:error, "Regex does not match on '#{String.lstrip(input)}'"}
       end
     end
   end
