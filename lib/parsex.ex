@@ -95,6 +95,12 @@ defmodule Parsex do
     end
   end
 
+  defmacro left <|> right do
+    quote do
+      por([unquote(left), unquote(right)])
+    end
+  end
+
   @doc """
   ###########
   ### AND ###
@@ -146,6 +152,13 @@ defmodule Parsex do
     end
   end
 
+  defmacro left <~> right do
+    quote do
+      pand([unquote(left), unquote(right)])
+    end
+  end
+
+
   @doc """
   ######################
   ### AND KEEP FIRST ###
@@ -158,6 +171,12 @@ defmodule Parsex do
   @spec and_keep_first([parser]) :: parser
   def and_keep_first(parsers) do
     parsers |> do_and_keep |> pand
+  end
+
+  defmacro left <~ right do
+    quote do
+      and_keep_first([unquote(left), unquote(right)])
+    end
   end
 
   @doc """
@@ -176,6 +195,12 @@ defmodule Parsex do
     |> do_and_keep
     |> Enum.reverse
     |> pand
+  end
+
+  defmacro left ~> right do
+    quote do
+      and_keep_last([unquote(left), unquote(right)])
+    end
   end
 
   @doc """
@@ -203,6 +228,12 @@ defmodule Parsex do
     end
   end
 
+  defmacro left ~>> fun do
+    quote do
+      and_then(unquote(left), unquote(fun))
+    end
+  end
+
   @doc """
   ###############
   ### REPLACE ###
@@ -227,7 +258,7 @@ defmodule Parsex do
       {:ok, rem, res |> String.lstrip}
     end
 
-    [fp|for parser <- rest_of_parsers, do: replace(parser, "")]
+    [fp|(for parser <- rest_of_parsers, do: replace(parser, ""))]
   end
 
   defp pad(match, original_input) do

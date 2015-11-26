@@ -39,6 +39,13 @@ defmodule ParsexTest do
     )
   end
 
+  test "por/2 operator syntax" do
+    foo_or_bar_or_baz = lit("foo") <|> lit("bar") <|> lit("baz")
+    assert(
+      {:ok, "", "baz"} = foo_or_bar_or_baz.("baz")
+    )
+  end
+
   test "pand/2 and parsing" do
     assert(
       {:ok, "", "foo bar"} = pand(
@@ -80,6 +87,13 @@ defmodule ParsexTest do
     )
   end
 
+  test "pand/2 operator syntax" do
+    foo_and_bar = lit("foo") <~> lit("bar")
+    assert(
+      {:ok, "", "foo bar"} = foo_and_bar.("foo bar")
+    )
+  end
+
   test "and_keep_first/1 and_keep_first parsing" do
     assert(
       {:ok, "", "one"} = and_keep_first(
@@ -94,6 +108,14 @@ defmodule ParsexTest do
            lit("yours")
          ]
       ).("one day son this will all be yours")
+    )
+  end
+
+  test "and_keep_first/1 operator syntax" do
+    one = lit("one") <~ lit("day son this will all be yours")
+    assert(
+      {:ok, "", "one"} =
+        one.("one day son this will all be yours")
     )
   end
 
@@ -124,6 +146,14 @@ defmodule ParsexTest do
     )
   end
 
+  test "and_keep_last/1 operator syntax" do
+    ahhh = lit("one day son this will all be") ~> lit("ahhh")
+    assert(
+      {:ok, "", "ahhh"} =
+        ahhh.("one day son this will all be ahhh")
+    )
+  end
+
   test "and_then/2 and_then parsing" do
     assert(
       {:ok, "", "foo bar baz quuxquuxquux"} = pand(
@@ -136,6 +166,14 @@ defmodule ParsexTest do
            )
          ]
       ).("foo bar baz quux")
+    )
+  end
+
+  test "and_then/2 operator syntax" do
+    three_times = lit("quux") ~>> fn value -> value <> value <> value end
+    assert(
+      {:ok, "", "quuxquuxquux"} =
+        three_times.("quux")
     )
   end
 
