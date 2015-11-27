@@ -14,6 +14,15 @@ defmodule Parsex do
   given string forms the prefix of the input.
 
   Input is stripped of leading spaces before match.
+
+      iex> lit("foo").("foo")
+      {:ok, "", "foo"}
+
+      iex> lit("foo").("bar")
+      {:error, "literal 'foo' did not match"}
+
+      iex> lit("we shall meet").("we shall meet again")
+      {:ok, " again", "we shall meet"}
   """
   @spec lit(String.t) :: parser
   def lit(literal) do
@@ -38,6 +47,9 @@ defmodule Parsex do
   given regular expression matches.
 
   Input is stripped of leading spaces before match
+
+      iex> pregex(~r/^\\w{3} as easy as \\d{3}/).("abc as easy as 123")
+      {:ok, "", "abc as easy as 123"}
   """
   @spec pregex(Regex.t) :: parser
   def pregex(regex) do
@@ -66,6 +78,13 @@ defmodule Parsex do
 
   Creates a logical `OR` parser from a collection of other parsers.
   This parser will succeed if at least one of its given parsers succeeds.
+
+      iex> por([lit("foo"), lit("bar"), lit("baz")]).("baz")
+      {:ok, "", "baz"}
+
+      iex> por([lit("foo"), lit("bar"), lit("baz")]).("quux")
+      {:error, "literal 'baz' did not match"}
+
   """
   @spec por([parser]) :: parser
   def por(parsers) do
@@ -95,6 +114,11 @@ defmodule Parsex do
     end
   end
 
+  @doc """
+      iex> foo_or_bar_or_baz = lit("foo") <|> lit("bar") <|> lit("baz")
+      iex> foo_or_bar_or_baz.("baz")
+      {:ok, "", "baz"}
+  """
   defmacro left <|> right do
     quote do
       por([unquote(left), unquote(right)])
@@ -108,6 +132,18 @@ defmodule Parsex do
 
   Creates a logical `AND` parser from a collection of other parsers.
   This parser will succeed if and only if all of its given parsers succeeds.
+
+      iex> pand([lit("foo"), lit("bar")]).("foo bar")
+      {:ok, "", "foo bar"}
+
+      iex> pand([lit("foo"), pand([lit("bar"), lit("baz"), lit("quux")])]).("foo bar baz quux")
+      {:ok, "", "foo bar baz quux"}
+
+      iex> pand([lit("foo"), pand([lit("bar"), lit("baz")])]).("foo bar baz quux")
+      {:ok, " quux", "foo bar baz"}
+
+      iex> pand([lit("foo"), pand([lit("bar"), pregex(~r/\w+/)])]).("foo bar")
+      {:error, "Regex does not match on ''"}
   """
   @spec pand([parser]) :: parser
   def pand(parsers) do
@@ -152,6 +188,10 @@ defmodule Parsex do
     end
   end
 
+  @doc """
+      iex> (lit("foo") <~> lit("bar")).("foo bar")
+      {:ok, "", "foo bar"}
+  """
   defmacro left <~> right do
     quote do
       pand([unquote(left), unquote(right)])
@@ -167,12 +207,29 @@ defmodule Parsex do
   Creates a logical `AND` parser from a collection of other parsers.
   In the case of a success, this parser will return only the result of
   the first given parser.
+
+      iex> and_keep_first([
+      ...> lit("one"),
+      ...> lit("day"),
+      ...> lit("son"),
+      ...> lit("this"),
+      ...> lit("will"),
+      ...> lit("all"),
+      ...> lit("be"),
+      ...> lit("yours")]).("one day son this will all be yours")
+      {:ok, "", "one"}
+
   """
   @spec and_keep_first([parser]) :: parser
   def and_keep_first(parsers) do
     parsers |> do_and_keep |> pand
   end
 
+  @doc """
+      iex> one = lit("one") <~ lit("day son this will all be yours")
+      ...> one.("one day son this will all be yours")
+      {:ok, "", "one"}
+  """
   defmacro left <~ right do
     quote do
       and_keep_first([unquote(left), unquote(right)])
@@ -187,6 +244,25 @@ defmodule Parsex do
   Creates a logical `AND` parser from a collection of other parsers.
   In the case of a success, this parser will return only the result of
   the last given parser.
+
+      iex> and_keep_last([
+      ...> lit("one"),
+      ...> lit("day"),
+      ...> lit("son"),
+      ...> lit("this"),
+      ...> lit("will"),
+      ...> lit("all"),
+      ...> lit("be"),
+      ...> lit("ahhh")]).("one day son this will all be ahhh")
+      {:ok, "", "ahhh"}
+
+
+      iex> and_keep_last([
+      ...> lit("should"),
+      ...> lit("leave"),
+      ...> lit("trailing whitespace ")]).("should leave trailing whitespace ")
+      {:ok, "", "trailing whitespace "}
+
   """
   @spec and_keep_last([parser]) :: parser
   def and_keep_last(parsers) do
@@ -197,6 +273,11 @@ defmodule Parsex do
     |> pand
   end
 
+  @doc """
+      iex> ahhh = lit("one day son this will all be") ~> lit("ahhh")
+      ...> ahhh.("one day son this will all be ahhh")
+      {:ok, "", "ahhh"}
+  """
   defmacro left ~> right do
     quote do
       and_keep_last([unquote(left), unquote(right)])
@@ -211,6 +292,15 @@ defmodule Parsex do
   Creates a parser from a given parser and a given function.
   Applies the function to the result of the given parser and
   returns the result.
+
+      iex> pand([
+      ...> lit("foo"),
+      ...>   pand([lit("bar"), lit("baz")]),
+      ...>   and_then(
+      ...>     lit("quux"),
+      ...>     fn value -> value <> value <> value end)
+      ...>   ]).("foo bar baz quux")
+      {:ok, "", "foo bar baz quuxquuxquux"}
   """
   @spec and_then(parser, (... -> String.t)) :: parser
   def and_then(parser, fun) do
@@ -228,6 +318,11 @@ defmodule Parsex do
     end
   end
 
+  @doc """
+      iex> three_times = lit("quux") ~>> fn(value) -> value <> value <> value end
+      ...> three_times.("quux")
+      {:ok, "", "quuxquuxquux"}
+  """
   defmacro left ~>> fun do
     quote do
       and_then(unquote(left), unquote(fun))
@@ -241,6 +336,19 @@ defmodule Parsex do
 
   Creates a parser from a given parser and a given replacement value.
   Returns the replacement value in place of the result of the given parser.
+
+      iex> replace(
+      ...>   lit("han shot first"),
+      ...>   "han shot not even close to first").("han shot first")
+      {:ok, "", "han shot not even close to first"}
+
+      iex> pand([
+      ...> replace(lit("the year of our lord"), "the year of our dark lord"),
+      ...> replace(lit("1776"), "2015")]).("the year of our lord 1776")
+      {:ok, "", "the year of our dark lord 2015"}
+
+      iex> replace(lit("foo"), :bar).("foo")
+      {:ok, "", "bar"}
   """
   @spec replace(parser, term) :: parser
   def replace(parser, replacement) do
