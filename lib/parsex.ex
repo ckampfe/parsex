@@ -3,7 +3,9 @@ defmodule Parsex do
   Parser combinator functions.
   """
 
-  @type parser :: (... -> {:ok, String.t} | {:error, String.t})
+  defmodule Parser do
+    @type t :: (... -> {:ok, String.t, String.t} | {:error, String.t})
+  end
 
   @doc """
   ######################
@@ -24,7 +26,7 @@ defmodule Parsex do
       iex> lit("we shall meet").("we shall meet again")
       {:ok, " again", "we shall meet"}
   """
-  @spec lit(String.t) :: parser
+  @spec lit(String.t) :: Parser.t
   def lit(literal) do
     fn input ->
       if String.lstrip(input) |> String.starts_with?(literal) do
@@ -51,7 +53,7 @@ defmodule Parsex do
       iex> pregex(~r/^\\w{3} as easy as \\d{3}/).("abc as easy as 123")
       {:ok, "", "abc as easy as 123"}
   """
-  @spec pregex(Regex.t) :: parser
+  @spec pregex(Regex.t) :: Parser.t
   def pregex(regex) do
     fn input ->
       if Regex.match?(regex, String.lstrip(input)) do
@@ -86,7 +88,7 @@ defmodule Parsex do
       {:error, "literal 'baz' did not match"}
 
   """
-  @spec por([parser]) :: parser
+  @spec por([Parser.t]) :: Parser.t
   def por(parsers) do
     fn input ->
       do_por(parsers, input)
@@ -145,7 +147,7 @@ defmodule Parsex do
       iex> pand([lit("foo"), pand([lit("bar"), pregex(~r/\w+/)])]).("foo bar")
       {:error, "Regex does not match on ''"}
   """
-  @spec pand([parser]) :: parser
+  @spec pand([Parser.t]) :: Parser.t
   def pand(parsers) do
     fn input ->
       do_pand(parsers, input)
@@ -220,7 +222,7 @@ defmodule Parsex do
       {:ok, "", "one"}
 
   """
-  @spec and_keep_first([parser]) :: parser
+  @spec and_keep_first([Parser.t]) :: Parser.t
   def and_keep_first(parsers) do
     parsers |> do_and_keep |> pand
   end
@@ -264,7 +266,7 @@ defmodule Parsex do
       {:ok, "", "trailing whitespace "}
 
   """
-  @spec and_keep_last([parser]) :: parser
+  @spec and_keep_last([Parser.t]) :: Parser.t
   def and_keep_last(parsers) do
     parsers
     |> Enum.reverse
@@ -302,7 +304,7 @@ defmodule Parsex do
       ...>   ]).("foo bar baz quux")
       {:ok, "", "foo bar baz quuxquuxquux"}
   """
-  @spec and_then(parser, (... -> String.t)) :: parser
+  @spec and_then(Parser.t, (... -> String.t)) :: Parser.t
   def and_then(parser, fun) do
     fn input ->
       case parser.(input) do
@@ -350,9 +352,9 @@ defmodule Parsex do
       iex> replace(lit("foo"), :bar).("foo")
       {:ok, "", "bar"}
   """
-  @spec replace(parser, term) :: parser
+  @spec replace(Parser.t, term) :: Parser.t
   def replace(parser, replacement) do
-    and_then(parser, fn _original_value -> to_string(replacement) end)
+    and_then(parser, fn(_original_value) -> to_string(replacement) end)
   end
 
   @doc """
