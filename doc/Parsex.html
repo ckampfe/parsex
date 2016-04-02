@@ -1,0 +1,708 @@
+    <!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Parsex – Parsex v0.0.1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.11.1">
+    <link rel="stylesheet" href="dist/app-6bc9434c82.css" />
+    <script src="dist/sidebar_items.js"></script>
+  </head>
+  <body data-type="modules">
+
+    <div class="main">
+<button class="sidebar-toggle">
+  <i class="icon-menu"></i>
+</button>
+<section class="sidebar">
+  <button class="sidebar-toggle">
+    <i class="icon-menu"></i>
+  </button>
+
+  
+  <a href="api-reference.html" class="sidebar-projectLink">
+    <div class="sidebar-projectDetails">
+      <h1 class="sidebar-projectName">
+        Parsex
+      </h1>
+      <h2 class="sidebar-projectVersion">
+        v0.0.1
+      </h2>
+    </div>
+    
+  </a>
+
+  <div class="sidebar-search">
+    <i class="icon-search"></i>
+    <input type="text" class="sidebar-searchInput" placeholder="search" autocomplete="off" />
+  </div>
+
+  <ul class="sidebar-listNav">
+    <li><a id="extras-list" href="#full-list">Pages</a></li>
+
+    
+      <li><a id="modules-list" href="#full-list">Modules</a></li>
+    
+
+    
+
+    
+  </ul>
+
+  <ul id="full-list" class="sidebar-fullList"></ul>
+  <div class="sidebar-noResults"></div>
+</section>
+
+<section class="content">
+  <div id="content" class="content-inner">
+
+
+      <h1>
+        <small class="visible-xs">Parsex v0.0.1</small>
+        Parsex
+        
+        
+          <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L1" title="View Source" class="view-source" rel="help">
+            <i class="icon-code"></i>
+          </a>
+        
+      </h1>
+
+      
+        <section id="moduledoc" class="docstring">
+          <p>Parser combinator functions.</p>
+
+        </section>
+      
+
+      
+        <section id="summary" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#summary">
+              <i class="icon-link"></i>
+            </a>
+            Summary
+          </h1>
+          
+
+          
+  <div class="summary-functions summary">
+    <h2>
+      <a href="#functions">Functions</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#and_keep_first/1">and_keep_first(parsers)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p id="section"></p>
+<h3 id="and-keep-first">AND KEEP FIRST</h3>
+<p id="section-1"></p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#and_keep_last/1">and_keep_last(parsers)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p id="section"></p>
+<h3 id="and-keep-last">AND KEEP LAST</h3>
+<p id="section-1"></p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#and_then/2">and_then(parser, fun)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p id="section"></p>
+<h3 id="and-then">AND THEN</h3>
+<p id="section-1"></p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#lit/1">lit(literal)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p id="section"></p>
+<h3 id="string-literal">STRING LITERAL</h3>
+<p id="section-1"></p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pand/1">pand(parsers)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p id="section"></p>
+<h3 id="and">AND</h3>
+<p id="section-1"></p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#por/1">por(parsers)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p id="section"></p>
+<h3 id="or">OR</h3>
+<p id="section-1"></p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#pregex/1">pregex(regex)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p id="section"></p>
+<h3 id="regex">REGEX</h3>
+<p id="section-1"></p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#replace/2">replace(parser, replacement)</a>
+  </div>
+  
+    <div class="summary-synopsis"><p id="section"></p>
+<h3 id="replace">REPLACE</h3>
+<p id="section-1"></p>
+</div>
+  
+</div>
+
+  </div>
+
+
+          
+  <div class="summary-macros summary">
+    <h2>
+      <a href="#macros">Macros</a>
+    </h2>
+    <div class="summary-row">
+  <div class="summary-signature">
+    <a href="#%3C%7C%3E/2">left &lt;|&gt; right</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>iex&gt; foo_or_bar_or_baz = lit(&quot;foo&quot;) &lt;|&gt; lit(&quot;bar&quot;) &lt;|&gt; lit(&quot;baz&quot;) iex&gt; foo_or_bar_or_baz.(&quot;baz&quot;) {:ok, &quot;&quot;, &quot;baz&quot;}</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#%3C~/2">left &lt;~ right</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>iex&gt; one = lit(&quot;one&quot;) &lt;~ lit(&quot;day son this will all be yours&quot;) ...&gt; one.(&quot;one day son this will all be yours&quot;) {:ok, &quot;&quot;, &quot;one&quot;}</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#%3C~%3E/2">left &lt;~&gt; right</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>iex&gt; (lit(&quot;foo&quot;) &lt;~&gt; lit(&quot;bar&quot;)).(&quot;foo bar&quot;) {:ok, &quot;&quot;, &quot;foo bar&quot;}</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#~%3E/2">left ~&gt; right</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>iex&gt; ahhh = lit(&quot;one day son this will all be&quot;) ~&gt; lit(&quot;ahhh&quot;) ...&gt; ahhh.(&quot;one day son this will all be ahhh&quot;) {:ok, &quot;&quot;, &quot;ahhh&quot;}</p>
+</div>
+  
+</div>
+<div class="summary-row">
+  <div class="summary-signature">
+    <a href="#~%3E%3E/2">left ~&gt;&gt; fun</a>
+  </div>
+  
+    <div class="summary-synopsis"><p>iex&gt; three_times = lit(&quot;quux&quot;) ~&gt;&gt; fn(value) -&gt; value &lt;&gt; value &lt;&gt; value end ...&gt; three_times.(&quot;quux&quot;) {:ok, &quot;&quot;, &quot;quuxquuxquux&quot;}</p>
+</div>
+  
+</div>
+
+  </div>
+
+
+          
+
+        </section>
+      
+
+      
+
+      
+        <section id="functions" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#functions">
+              <i class="icon-link"></i>
+            </a>
+            Functions
+          </h1>
+          <div class="detail" id="and_keep_first/1">
+  <div class="detail-header">
+    <a href="#and_keep_first/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">and_keep_first(parsers)</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L229" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+    <div class="specs">
+      <h4 class="specs-title">Specs</h4>
+      <div class="specs-list">
+        
+          <pre><code class="elixir">and_keep_first([<a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a>]) :: <a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a></code></pre>
+        
+      </div>
+    </div>
+  
+  <section class="docstring">
+    <p id="section"></p>
+<h3 id="and-keep-first">AND KEEP FIRST</h3>
+<p id="section-1"></p>
+<p>Creates a logical <code>AND</code> parser from a collection of other parsers. In the case of a success, this parser will return only the result of the first given parser.</p>
+<pre><code class="iex elixir">iex&gt; and_keep_first([
+...&gt; lit(&quot;one&quot;),
+...&gt; lit(&quot;day&quot;),
+...&gt; lit(&quot;son&quot;),
+...&gt; lit(&quot;this&quot;),
+...&gt; lit(&quot;will&quot;),
+...&gt; lit(&quot;all&quot;),
+...&gt; lit(&quot;be&quot;),
+...&gt; lit(&quot;yours&quot;)]).(&quot;one day son this will all be yours&quot;)
+{:ok, &quot;&quot;, &quot;one&quot;}</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="and_keep_last/1">
+  <div class="detail-header">
+    <a href="#and_keep_last/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">and_keep_last(parsers)</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L273" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+    <div class="specs">
+      <h4 class="specs-title">Specs</h4>
+      <div class="specs-list">
+        
+          <pre><code class="elixir">and_keep_last([<a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a>]) :: <a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a></code></pre>
+        
+      </div>
+    </div>
+  
+  <section class="docstring">
+    <p id="section"></p>
+<h3 id="and-keep-last">AND KEEP LAST</h3>
+<p id="section-1"></p>
+<p>Creates a logical <code>AND</code> parser from a collection of other parsers. In the case of a success, this parser will return only the result of the last given parser.</p>
+<pre><code class="iex elixir">iex&gt; and_keep_last([
+...&gt; lit(&quot;one&quot;),
+...&gt; lit(&quot;day&quot;),
+...&gt; lit(&quot;son&quot;),
+...&gt; lit(&quot;this&quot;),
+...&gt; lit(&quot;will&quot;),
+...&gt; lit(&quot;all&quot;),
+...&gt; lit(&quot;be&quot;),
+...&gt; lit(&quot;ahhh&quot;)]).(&quot;one day son this will all be ahhh&quot;)
+{:ok, &quot;&quot;, &quot;ahhh&quot;}
+
+
+iex&gt; and_keep_last([
+...&gt; lit(&quot;should&quot;),
+...&gt; lit(&quot;leave&quot;),
+...&gt; lit(&quot;trailing whitespace &quot;)]).(&quot;should leave trailing whitespace &quot;)
+{:ok, &quot;&quot;, &quot;trailing whitespace &quot;}</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="and_then/2">
+  <div class="detail-header">
+    <a href="#and_then/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">and_then(parser, fun)</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L311" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+    <div class="specs">
+      <h4 class="specs-title">Specs</h4>
+      <div class="specs-list">
+        
+          <pre><code class="elixir">and_then(<a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a>, (... -> <a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>)) :: <a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a></code></pre>
+        
+      </div>
+    </div>
+  
+  <section class="docstring">
+    <p id="section"></p>
+<h3 id="and-then">AND THEN</h3>
+<p id="section-1"></p>
+<p>Creates a parser from a given parser and a given function. Applies the function to the result of the given parser and returns the result.</p>
+<pre><code class="iex elixir">iex&gt; pand([
+...&gt; lit(&quot;foo&quot;),
+...&gt;   pand([lit(&quot;bar&quot;), lit(&quot;baz&quot;)]),
+...&gt;   and_then(
+...&gt;     lit(&quot;quux&quot;),
+...&gt;     fn value -&gt; value &lt;&gt; value &lt;&gt; value end)
+...&gt;   ]).(&quot;foo bar baz quux&quot;)
+{:ok, &quot;&quot;, &quot;foo bar baz quuxquuxquux&quot;}</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="lit/1">
+  <div class="detail-header">
+    <a href="#lit/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">lit(literal)</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L30" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+    <div class="specs">
+      <h4 class="specs-title">Specs</h4>
+      <div class="specs-list">
+        
+          <pre><code class="elixir">lit(<a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>) :: <a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a></code></pre>
+        
+      </div>
+    </div>
+  
+  <section class="docstring">
+    <p id="section"></p>
+<h3 id="string-literal">STRING LITERAL</h3>
+<p id="section-1"></p>
+<p>Creates a parser from a <code>String</code> literal that succeeds if the given string forms the prefix of the input.</p>
+<p>Input is stripped of leading spaces before match.</p>
+<pre><code class="iex elixir">iex&gt; lit(&quot;foo&quot;).(&quot;foo&quot;)
+{:ok, &quot;&quot;, &quot;foo&quot;}
+
+iex&gt; lit(&quot;foo&quot;).(&quot;bar&quot;)
+{:error, &quot;literal &#39;foo&#39; did not match&quot;}
+
+iex&gt; lit(&quot;we shall meet&quot;).(&quot;we shall meet again&quot;)
+{:ok, &quot; again&quot;, &quot;we shall meet&quot;}</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="pand/1">
+  <div class="detail-header">
+    <a href="#pand/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">pand(parsers)</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L154" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+    <div class="specs">
+      <h4 class="specs-title">Specs</h4>
+      <div class="specs-list">
+        
+          <pre><code class="elixir">pand([<a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a>]) :: <a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a></code></pre>
+        
+      </div>
+    </div>
+  
+  <section class="docstring">
+    <p id="section"></p>
+<h3 id="and">AND</h3>
+<p id="section-1"></p>
+<p>Creates a logical <code>AND</code> parser from a collection of other parsers. This parser will succeed if and only if all of its given parsers succeeds.</p>
+<pre><code class="iex elixir">iex&gt; pand([lit(&quot;foo&quot;), lit(&quot;bar&quot;)]).(&quot;foo bar&quot;)
+{:ok, &quot;&quot;, &quot;foo bar&quot;}
+
+iex&gt; pand([lit(&quot;foo&quot;), pand([lit(&quot;bar&quot;), lit(&quot;baz&quot;), lit(&quot;quux&quot;)])]).(&quot;foo bar baz quux&quot;)
+{:ok, &quot;&quot;, &quot;foo bar baz quux&quot;}
+
+iex&gt; pand([lit(&quot;foo&quot;), pand([lit(&quot;bar&quot;), lit(&quot;baz&quot;)])]).(&quot;foo bar baz quux&quot;)
+{:ok, &quot; quux&quot;, &quot;foo bar baz&quot;}
+
+iex&gt; pand([lit(&quot;foo&quot;), pand([lit(&quot;bar&quot;), pregex(~r/w+/)])]).(&quot;foo bar&quot;)
+{:error, &quot;Regex does not match on &#39;&#39;&quot;}</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="por/1">
+  <div class="detail-header">
+    <a href="#por/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">por(parsers)</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L95" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+    <div class="specs">
+      <h4 class="specs-title">Specs</h4>
+      <div class="specs-list">
+        
+          <pre><code class="elixir">por([<a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a>]) :: <a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a></code></pre>
+        
+      </div>
+    </div>
+  
+  <section class="docstring">
+    <p id="section"></p>
+<h3 id="or">OR</h3>
+<p id="section-1"></p>
+<p>Creates a logical <code>OR</code> parser from a collection of other parsers. This parser will succeed if at least one of its given parsers succeeds.</p>
+<pre><code class="iex elixir">iex&gt; por([lit(&quot;foo&quot;), lit(&quot;bar&quot;), lit(&quot;baz&quot;)]).(&quot;baz&quot;)
+{:ok, &quot;&quot;, &quot;baz&quot;}
+
+iex&gt; por([lit(&quot;foo&quot;), lit(&quot;bar&quot;), lit(&quot;baz&quot;)]).(&quot;foo&quot;)
+{:ok, &quot;&quot;, &quot;foo&quot;}
+
+iex&gt; por([lit(&quot;foo&quot;), lit(&quot;bar&quot;), lit(&quot;baz&quot;)]).(&quot;quux&quot;)
+{:error, &quot;literal &#39;baz&#39; did not match&quot;}</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="pregex/1">
+  <div class="detail-header">
+    <a href="#pregex/1" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">pregex(regex)</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L57" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+    <div class="specs">
+      <h4 class="specs-title">Specs</h4>
+      <div class="specs-list">
+        
+          <pre><code class="elixir">pregex(<a href="http://elixir-lang.org/docs/stable/elixir/Regex.html#t:t/0">Regex.t</a>) :: <a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a></code></pre>
+        
+      </div>
+    </div>
+  
+  <section class="docstring">
+    <p id="section"></p>
+<h3 id="regex">REGEX</h3>
+<p id="section-1"></p>
+<p>Creates a parser from a Regex literal that succeeds if the given regular expression matches.</p>
+<p>Input is stripped of leading spaces before match</p>
+<pre><code class="iex elixir">iex&gt; pregex(~r/^\w{3} as easy as \d{3}/).(&quot;abc as easy as 123&quot;)
+{:ok, &quot;&quot;, &quot;abc as easy as 123&quot;}</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="replace/2">
+  <div class="detail-header">
+    <a href="#replace/2" class="detail-link" title="Link to this function">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">replace(parser, replacement)</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L359" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+    <div class="specs">
+      <h4 class="specs-title">Specs</h4>
+      <div class="specs-list">
+        
+          <pre><code class="elixir">replace(<a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a>, term) :: <a href="Parsex.Parser.html#t:t/0">Parsex.Parser.t</a></code></pre>
+        
+      </div>
+    </div>
+  
+  <section class="docstring">
+    <p id="section"></p>
+<h3 id="replace">REPLACE</h3>
+<p id="section-1"></p>
+<p>Creates a parser from a given parser and a given replacement value. Returns the replacement value in place of the result of the given parser.</p>
+<pre><code class="iex elixir">iex&gt; replace(
+...&gt;   lit(&quot;han shot first&quot;),
+...&gt;   &quot;han shot not even close to first&quot;).(&quot;han shot first&quot;)
+{:ok, &quot;&quot;, &quot;han shot not even close to first&quot;}
+
+iex&gt; pand([
+...&gt; replace(lit(&quot;the year of our lord&quot;), &quot;the year of our dark lord&quot;),
+...&gt; replace(lit(&quot;1776&quot;), &quot;2015&quot;)]).(&quot;the year of our lord 1776&quot;)
+{:ok, &quot;&quot;, &quot;the year of our dark lord 2015&quot;}
+
+iex&gt; replace(lit(&quot;foo&quot;), :bar).(&quot;foo&quot;)
+{:ok, &quot;&quot;, &quot;bar&quot;}</code></pre>
+
+  </section>
+</div>
+
+        </section>
+      
+
+      
+        <section id="macros" class="details-list">
+          <h1 class="section-heading">
+            <a class="hover-link" href="#macros">
+              <i class="icon-link"></i>
+            </a>
+            Macros
+          </h1>
+          <div class="detail" id="%3C%7C%3E/2">
+  <div class="detail-header">
+    <a href="#%3C%7C%3E/2" class="detail-link" title="Link to this macro">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">left &lt;|&gt; right</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L127" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+  <section class="docstring">
+    <pre><code class="iex elixir">iex&gt; foo_or_bar_or_baz = lit(&quot;foo&quot;) &lt;|&gt; lit(&quot;bar&quot;) &lt;|&gt; lit(&quot;baz&quot;)
+iex&gt; foo_or_bar_or_baz.(&quot;baz&quot;)
+{:ok, &quot;&quot;, &quot;baz&quot;}</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="%3C~/2">
+  <div class="detail-header">
+    <a href="#%3C~/2" class="detail-link" title="Link to this macro">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">left &lt;~ right</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L238" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+  <section class="docstring">
+    <pre><code class="iex elixir">iex&gt; one = lit(&quot;one&quot;) &lt;~ lit(&quot;day son this will all be yours&quot;)
+...&gt; one.(&quot;one day son this will all be yours&quot;)
+{:ok, &quot;&quot;, &quot;one&quot;}</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="%3C~%3E/2">
+  <div class="detail-header">
+    <a href="#%3C~%3E/2" class="detail-link" title="Link to this macro">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">left &lt;~&gt; right</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L200" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+  <section class="docstring">
+    <pre><code class="iex elixir">iex&gt; (lit(&quot;foo&quot;) &lt;~&gt; lit(&quot;bar&quot;)).(&quot;foo bar&quot;)
+{:ok, &quot;&quot;, &quot;foo bar&quot;}</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="~%3E/2">
+  <div class="detail-header">
+    <a href="#~%3E/2" class="detail-link" title="Link to this macro">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">left ~&gt; right</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L286" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+  <section class="docstring">
+    <pre><code class="iex elixir">iex&gt; ahhh = lit(&quot;one day son this will all be&quot;) ~&gt; lit(&quot;ahhh&quot;)
+...&gt; ahhh.(&quot;one day son this will all be ahhh&quot;)
+{:ok, &quot;&quot;, &quot;ahhh&quot;}</code></pre>
+
+  </section>
+</div>
+<div class="detail" id="~%3E%3E/2">
+  <div class="detail-header">
+    <a href="#~%3E%3E/2" class="detail-link" title="Link to this macro">
+      <i class="icon-link"></i>
+    </a>
+    <span class="signature">left ~&gt;&gt; fun</span>
+      
+      <a href="https://github.com/ckampfe/parsex/blob/master/lib/parsex.ex#L331" class="view-source" rel="help" title="View Source">
+       <i class="icon-code"></i>
+     </a>
+    
+  </div>
+  
+  <section class="docstring">
+    <pre><code class="iex elixir">iex&gt; three_times = lit(&quot;quux&quot;) ~&gt;&gt; fn(value) -&gt; value &lt;&gt; value &lt;&gt; value end
+...&gt; three_times.(&quot;quux&quot;)
+{:ok, &quot;&quot;, &quot;quuxquuxquux&quot;}</code></pre>
+
+  </section>
+</div>
+
+        </section>
+      
+
+      
+        <footer class="footer">
+      <p>
+        <span class="line">
+          Built using
+          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" rel="help" target="_blank">ExDoc</a> (v0.11.1),
+        </span>
+        <span class="line">
+          designed by
+          <a href="https://twitter.com/dignifiedquire" target="_blank" title="@dignifiedquire">Friedel Ziegelmayer</a>.
+          </span>
+      </p>
+    </footer>
+  </div>
+</section>
+</div>
+  <script src="dist/app-c7aad77d7d.js"></script>
+  </body>
+</html>
+
