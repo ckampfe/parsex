@@ -84,6 +84,9 @@ defmodule Parsex do
       iex> por([lit("foo"), lit("bar"), lit("baz")]).("baz")
       {:ok, "", "baz"}
 
+      iex> por([lit("foo"), lit("bar"), lit("baz")]).("foo")
+      {:ok, "", "foo"}
+
       iex> por([lit("foo"), lit("bar"), lit("baz")]).("quux")
       {:error, "literal 'baz' did not match"}
 
@@ -109,7 +112,7 @@ defmodule Parsex do
   # build
   defp do_por(parser, parsers, input) do
     case parser.(input) do
-      {:ok, remaining_input} -> {:ok, remaining_input}
+      {:ok, remaining_input, result} -> {:ok, remaining_input, result}
       _ ->
         [next_parser|remaining_parsers] = parsers
         do_por(next_parser, remaining_parsers, input)
