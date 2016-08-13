@@ -9,9 +9,6 @@ A little parser combinator library
 - regex
 - or
 - and
-- and (keep first)
-- and (keep last)
-- and then
-- replace
+- then
 
-See `test/parsex_test.exs` for examples.
+See the [documentation](https://ckampfe.github.io/parsex/api-reference.html) for examples.

@@ -3,11 +3,11 @@ defmodule Parsex.Mixfile do
 
   def project do
     [app: :parsex,
-     version: "0.0.1",
+     version: "0.1.0",
      name: "Parsex",
      source_url: "https://github.com/ckampfe/parsex",
      homepage_url: "http://ckampfe.github.io/parsex",
-     elixir: ">= 1.0.0",
+     elixir: ">= 1.3.0",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps]

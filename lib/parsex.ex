@@ -4,384 +4,205 @@ defmodule Parsex do
   """
 
   defmodule Parser do
-    @type t :: (... -> {:ok, String.t, String.t} | {:error, String.t})
+    @typep input :: String.t
+    @type t :: (input -> Parser.Success.t | Parser.Failure.t)
+
+    defmodule Success do
+      @type t :: %__MODULE__{}
+      defstruct [
+        result: "",
+        remaining: ""
+      ]
+    end
+
+    defmodule Failure do
+      @type t :: %__MODULE__{}
+      defstruct [
+        parse_string: "",
+        remaining: ""
+      ]
+    end
   end
 
   @doc """
-  ######################
-  ### STRING LITERAL ###
-  ######################
+  Create a parser from a `String.t`.
 
-  Creates a parser from a `String` literal that succeeds if the
-  given string forms the prefix of the input.
+      iex> foo = str("foo")
+      iex> foo.("foo bar")
+      %Parsex.Parser.Success{result: "foo", remaining: " bar"}
 
-  Input is stripped of leading spaces before match.
-
-      iex> lit("foo").("foo")
-      {:ok, "", "foo"}
-
-      iex> lit("foo").("bar")
-      {:error, "literal 'foo' did not match"}
-
-      iex> lit("we shall meet").("we shall meet again")
-      {:ok, " again", "we shall meet"}
+      iex> foo = str("foo")
+      iex> foo.("baz quux")
+      %Parsex.Parser.Failure{parse_string: "foo", remaining: "baz quux"}
   """
-  @spec lit(String.t) :: Parser.t
-  def lit(literal) do
-    fn input ->
-      if String.lstrip(input) |> String.starts_with?(literal) do
-        literal_size = byte_size(literal)
-        << _ :: binary-size(literal_size), rest :: binary >> = String.lstrip(input)
-
-        {:ok, rest, pad(literal, input)}
-      else
-        {:error, "literal '#{literal}' did not match"}
+  @spec str(String.t) :: Parser.t
+  def str(prefix) do
+    fn(input) ->
+      case String.starts_with?(input, prefix) do
+        true ->
+          prefix_size = byte_size(prefix)
+          << prefix::binary-size(prefix_size), remaining::bitstring>> = input
+          %Parser.Success{result: prefix, remaining: remaining}
+        false ->
+          %Parser.Failure{parse_string: prefix, remaining: input}
       end
     end
   end
 
   @doc """
-  #############
-  ### REGEX ###
-  #############
+  Create a parser from a regular expression
 
-  Creates a parser from a Regex literal that succeeds if the
-  given regular expression matches.
+      iex> foo = re(~r/foo/)
+      iex> foo.("foo bar")
+      %Parsex.Parser.Success{result: "foo", remaining: " bar"}
 
-  Input is stripped of leading spaces before match
-
-      iex> pregex(~r/^\\w{3} as easy as \\d{3}/).("abc as easy as 123")
-      {:ok, "", "abc as easy as 123"}
+      iex> foo = re(~r/foo/)
+      iex> foo.("bar baz")
+      %Parsex.Parser.Failure{parse_string: "foo", remaining: "bar baz"}
   """
-  @spec pregex(Regex.t) :: Parser.t
-  def pregex(regex) do
-    fn input ->
-      if Regex.match?(regex, String.lstrip(input)) do
-        result = Regex.run(regex, String.lstrip(input))
-
-        # removes the result from the input
-        remaining_input = Regex.replace(regex, String.lstrip(input), "")
-
-        {
-          :ok,
-          remaining_input,
-          result |> Enum.fetch!(0) |> pad(input)
-        }
-      else
-        {:error, "Regex does not match on '#{String.lstrip(input)}'"}
+  @spec re(String.t) :: Parser.t
+  def re(regex) do
+    fn(input) ->
+      case Regex.run(regex, input) do
+        [matches] ->
+          remaining = Regex.replace(regex, input, "")
+          %Parser.Success{result: matches, remaining: remaining}
+        nil -> %Parser.Failure{parse_string: regex.source, remaining: input}
       end
     end
   end
 
   @doc """
-  ##########
-  ### OR ###
-  ##########
+  Create a parser that succeeds if both of its subparsers succeed
 
-  Creates a logical `OR` parser from a collection of other parsers.
-  This parser will succeed if at least one of its given parsers succeeds.
+      iex> p1 = str("foo")
+      iex> p2 = str("bar")
+      iex> foo_and_bar = andd(p1, p2)
+      iex> foo_and_bar.("foobar")
+      %Parsex.Parser.Success{result: "foobar", remaining: ""}
 
-      iex> por([lit("foo"), lit("bar"), lit("baz")]).("baz")
-      {:ok, "", "baz"}
+      iex> p1 = str("foo")
+      iex> p2 = str("bar")
+      iex> foo_and_bar = andd(p1, p2)
+      iex> foo_and_bar.("foobaz")
+      %Parsex.Parser.Failure{parse_string: "bar", remaining: "baz"}
 
-      iex> por([lit("foo"), lit("bar"), lit("baz")]).("foo")
-      {:ok, "", "foo"}
-
-      iex> por([lit("foo"), lit("bar"), lit("baz")]).("quux")
-      {:error, "literal 'baz' did not match"}
-
+      iex> p1 = str("foo")
+      iex> p2 = str("bar")
+      iex> foo_and_bar = andd(p1, p2)
+      iex> foo_and_bar.("qoobar")
+      %Parsex.Parser.Failure{parse_string: "foo", remaining: "qoobar"}
   """
-  @spec por([Parser.t]) :: Parser.t
-  def por(parsers) do
-    fn input ->
-      do_por(parsers, input)
-    end
-  end
-
-  # initial
-  defp do_por(parsers, input) do
-    [parser|remaining_parsers] = parsers
-    do_por(parser, remaining_parsers, input)
-  end
-
-  # final
-  defp do_por(parser, [], input) do
-    parser.(input)
-  end
-
-  # build
-  defp do_por(parser, parsers, input) do
-    case parser.(input) do
-      {:ok, remaining_input, result} -> {:ok, remaining_input, result}
-      _ ->
-        [next_parser|remaining_parsers] = parsers
-        do_por(next_parser, remaining_parsers, input)
+  @spec andd(Parser.t, Parser.t) :: Parser.t
+  def andd(parser1, parser2) do
+    fn(input) ->
+      with %Parser.Success{
+            result: result1,
+            remaining: remaining1} <- parser1.(input),
+           %Parser.Success{
+             result: result2,
+             remaining: remaining2} <- parser2.(remaining1) do
+        %Parser.Success{result: result1 <> result2, remaining: remaining2}
+      else
+        %Parsex.Parser.Failure{} = e -> e
+      end
     end
   end
 
   @doc """
-      iex> foo_or_bar_or_baz = lit("foo") <|> lit("bar") <|> lit("baz")
-      iex> foo_or_bar_or_baz.("baz")
-      {:ok, "", "baz"}
+  Macro sugar for `andd/2`
+
+      iex> p1 = str("foo")
+      iex> p2 = str("bar")
+      iex> foo_and_bar = p1 <~> p2
+      iex> foo_and_bar.("foobar")
+      %Parsex.Parser.Success{result: "foobar", remaining: ""}
   """
-  defmacro left <|> right do
+  defmacro parser1 <~> parser2 do
     quote do
-      por([unquote(left), unquote(right)])
+      andd(unquote(parser1), unquote(parser2))
     end
   end
 
   @doc """
-  ###########
-  ### AND ###
-  ###########
+  Creates a parser that succeeds if one of its subparsers succeeds
+      iex> p1 = str("foo")
+      iex> p2 = str("bar")
+      iex> foo_and_bar = orr(p1, p2)
+      iex> foo_and_bar.("foo")
+      %Parsex.Parser.Success{result: "foo", remaining: ""}
 
-  Creates a logical `AND` parser from a collection of other parsers.
-  This parser will succeed if and only if all of its given parsers succeeds.
+      iex> p1 = str("foo")
+      iex> p2 = str("bar")
+      iex> foo_and_bar = orr(p1, p2)
+      iex> foo_and_bar.("bar")
+      %Parsex.Parser.Success{result: "bar", remaining: ""}
 
-      iex> pand([lit("foo"), lit("bar")]).("foo bar")
-      {:ok, "", "foo bar"}
-
-      iex> pand([lit("foo"), pand([lit("bar"), lit("baz"), lit("quux")])]).("foo bar baz quux")
-      {:ok, "", "foo bar baz quux"}
-
-      iex> pand([lit("foo"), pand([lit("bar"), lit("baz")])]).("foo bar baz quux")
-      {:ok, " quux", "foo bar baz"}
-
-      iex> pand([lit("foo"), pand([lit("bar"), pregex(~r/\w+/)])]).("foo bar")
-      {:error, "Regex does not match on ''"}
+      iex> p1 = str("foo")
+      iex> p2 = str("bar")
+      iex> foo_and_bar = orr(p1, p2)
+      iex> foo_and_bar.("bazquux")
+      %Parsex.Parser.Failure{parse_string: "bar", remaining: "bazquux"}
   """
-  @spec pand([Parser.t]) :: Parser.t
-  def pand(parsers) do
-    fn input ->
-      do_pand(parsers, input)
-    end
-  end
-
-  # initial
-  defp do_pand(parsers, input) do
-    [parser|remaining_parsers] = parsers
-    do_pand(parser, remaining_parsers, input, "")
-  end
-
-  # final
-  defp do_pand(parser, [], input, previous_result) do
-    parse_result = parser.(input)
-    case parse_result do
-      {:ok, remaining, new_result} ->
-        {
-          :ok,
-          remaining,
-          previous_result <> new_result
-        }
-      e -> e
-    end
-  end
-
-  # build
-  defp do_pand(parser, parsers, input, previous_result) do
-    case parser.(input) do
-      {:ok, remaining_input, new_result} ->
-        [next_parser|remaining_parsers] = parsers
-
-        do_pand(
-          next_parser,
-          remaining_parsers,
-          remaining_input,
-          previous_result <> new_result
-        )
-      e -> e
+  @spec orr(Parser.t, Parser.t) :: Parser.t
+  def orr(parser1, parser2) do
+    fn(input) ->
+      with %Parser.Success{} = s <- parser1.(input) do
+        s
+      else
+        %Parsex.Parser.Failure{} -> parser2.(input)
+      end
     end
   end
 
   @doc """
-      iex> (lit("foo") <~> lit("bar")).("foo bar")
-      {:ok, "", "foo bar"}
+  Macro sugar for `or/2`
+
+      iex> p1 = str("foo")
+      iex> p2 = str("bar")
+      iex> foo_and_bar = p1 <|> p2
+      iex> foo_and_bar.("foo")
+      %Parsex.Parser.Success{result: "foo", remaining: ""}
   """
-  defmacro left <~> right do
+  defmacro parser1 <|> parser2 do
     quote do
-      pand([unquote(left), unquote(right)])
+      orr(unquote(parser1), unquote(parser2))
     end
   end
 
 
   @doc """
-  ######################
-  ### AND KEEP FIRST ###
-  ######################
+  Create a parser that transforms a successful parse
 
-  Creates a logical `AND` parser from a collection of other parsers.
-  In the case of a success, this parser will return only the result of
-  the first given parser.
+      iex> foo = str("foo") |> then(fn(result) -> result <> "bar" end)
+      iex> foo.("foo")
+      %Parsex.Parser.Success{result: "foobar", remaining: ""}
 
-      iex> and_keep_first([
-      ...> lit("one"),
-      ...> lit("day"),
-      ...> lit("son"),
-      ...> lit("this"),
-      ...> lit("will"),
-      ...> lit("all"),
-      ...> lit("be"),
-      ...> lit("yours")]).("one day son this will all be yours")
-      {:ok, "", "one"}
-
+      iex> foo = str("foo") |> then(fn(result) -> result <> "bar" end)
+      iex> foo.("quux")
+      %Parsex.Parser.Failure{parse_string: "foo", remaining: "quux"}
   """
-  @spec and_keep_first([Parser.t]) :: Parser.t
-  def and_keep_first(parsers) do
-    parsers |> do_and_keep |> pand
-  end
-
-  @doc """
-      iex> one = lit("one") <~ lit("day son this will all be yours")
-      ...> one.("one day son this will all be yours")
-      {:ok, "", "one"}
-  """
-  defmacro left <~ right do
-    quote do
-      and_keep_first([unquote(left), unquote(right)])
-    end
-  end
-
-  @doc """
-  #####################
-  ### AND KEEP LAST ###
-  #####################
-
-  Creates a logical `AND` parser from a collection of other parsers.
-  In the case of a success, this parser will return only the result of
-  the last given parser.
-
-      iex> and_keep_last([
-      ...> lit("one"),
-      ...> lit("day"),
-      ...> lit("son"),
-      ...> lit("this"),
-      ...> lit("will"),
-      ...> lit("all"),
-      ...> lit("be"),
-      ...> lit("ahhh")]).("one day son this will all be ahhh")
-      {:ok, "", "ahhh"}
-
-
-      iex> and_keep_last([
-      ...> lit("should"),
-      ...> lit("leave"),
-      ...> lit("trailing whitespace ")]).("should leave trailing whitespace ")
-      {:ok, "", "trailing whitespace "}
-
-  """
-  @spec and_keep_last([Parser.t]) :: Parser.t
-  def and_keep_last(parsers) do
-    parsers
-    |> Enum.reverse
-    |> do_and_keep
-    |> Enum.reverse
-    |> pand
-  end
-
-  @doc """
-      iex> ahhh = lit("one day son this will all be") ~> lit("ahhh")
-      ...> ahhh.("one day son this will all be ahhh")
-      {:ok, "", "ahhh"}
-  """
-  defmacro left ~> right do
-    quote do
-      and_keep_last([unquote(left), unquote(right)])
-    end
-  end
-
-  @doc """
-  ################
-  ### AND THEN ###
-  ################
-
-  Creates a parser from a given parser and a given function.
-  Applies the function to the result of the given parser and
-  returns the result.
-
-      iex> pand([
-      ...> lit("foo"),
-      ...>   pand([lit("bar"), lit("baz")]),
-      ...>   and_then(
-      ...>     lit("quux"),
-      ...>     fn value -> value <> value <> value end)
-      ...>   ]).("foo bar baz quux")
-      {:ok, "", "foo bar baz quuxquuxquux"}
-  """
-  @spec and_then(Parser.t, (... -> String.t)) :: Parser.t
-  def and_then(parser, fun) do
-    fn input ->
+  @spec then(Parser.t, (String.t -> term)) :: Parser.t
+  def then(parser, function) do
+    fn(input) ->
       case parser.(input) do
-        {:ok, remaining_input, parse_result} ->
-          transformed = fun.(String.lstrip(parse_result))
-          {
-            :ok,
-            remaining_input,
-            pad(transformed, input)
-          }
-        e -> e
+        %Parser.Success{result: result, remaining: remaining} ->
+          %Parser.Success{result: function.(result), remaining: remaining}
+        %Parser.Failure{} = e -> e
       end
     end
   end
 
   @doc """
-      iex> three_times = lit("quux") ~>> fn(value) -> value <> value <> value end
-      ...> three_times.("quux")
-      {:ok, "", "quuxquuxquux"}
+  Macro sugar for `then/2`
+
+      iex> foo = str("foo") ~>> fn(result) -> result <> "bar" end
+      iex> foo.("foo")
+      %Parsex.Parser.Success{result: "foobar", remaining: ""}
   """
-  defmacro left ~>> fun do
+  defmacro parser1 ~>> function do
     quote do
-      and_then(unquote(left), unquote(fun))
-    end
-  end
-
-  @doc """
-  ###############
-  ### REPLACE ###
-  ###############
-
-  Creates a parser from a given parser and a given replacement value.
-  Returns the replacement value in place of the result of the given parser.
-
-      iex> replace(
-      ...>   lit("han shot first"),
-      ...>   "han shot not even close to first").("han shot first")
-      {:ok, "", "han shot not even close to first"}
-
-      iex> pand([
-      ...> replace(lit("the year of our lord"), "the year of our dark lord"),
-      ...> replace(lit("1776"), "2015")]).("the year of our lord 1776")
-      {:ok, "", "the year of our dark lord 2015"}
-
-      iex> replace(lit("foo"), :bar).("foo")
-      {:ok, "", "bar"}
-  """
-  @spec replace(Parser.t, term) :: Parser.t
-  def replace(parser, replacement) do
-    and_then(parser, fn(_original_value) -> to_string(replacement) end)
-  end
-
-  @doc """
-  #################
-  ### UTILITIES ###
-  #################
-  """
-  defp do_and_keep([first_parser|rest_of_parsers]) do
-    fp = fn input ->
-      {:ok, rem, res} = first_parser.(input)
-      {:ok, rem, res |> String.lstrip}
-    end
-
-    [fp|(for parser <- rest_of_parsers, do: replace(parser, ""))]
-  end
-
-  defp pad(match, original_input) do
-    if (match == "") do
-      match
-    else
-      stripped_input = String.lstrip(original_input)
-      pad_size =
-        String.length(match) + String.length(original_input) - String.length(stripped_input)
-      String.rjust(match, pad_size)
+      then(unquote(parser1), unquote(function))
     end
   end
 end
