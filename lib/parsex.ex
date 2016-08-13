@@ -156,7 +156,7 @@ defmodule Parsex do
   end
 
   @doc """
-  Macro sugar for `or/2`
+  Macro sugar for `orr/2`
 
       iex> p1 = str("foo")
       iex> p2 = str("bar")
