@@ -3,7 +3,7 @@ defmodule Parsex.Mixfile do
 
   def project do
     [app: :parsex,
-     version: "0.1.0",
+     version: "0.1.1",
      name: "Parsex",
      source_url: "https://github.com/ckampfe/parsex",
      homepage_url: "http://ckampfe.github.io/parsex",

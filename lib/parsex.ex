@@ -8,7 +8,7 @@ defmodule Parsex do
     @type t :: (input -> Parser.Success.t | Parser.Failure.t)
 
     defmodule Success do
-      @type t :: %__MODULE__{}
+      @type t :: %__MODULE__{result: String.t, remaining: String.t}
       defstruct [
         result: "",
         remaining: ""
@@ -16,7 +16,7 @@ defmodule Parsex do
     end
 
     defmodule Failure do
-      @type t :: %__MODULE__{}
+      @type t :: %__MODULE__{parse_string: String.t, remaining: String.t}
       defstruct [
         parse_string: "",
         remaining: ""
