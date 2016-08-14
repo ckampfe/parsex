@@ -109,18 +109,26 @@ defmodule Parsex do
   """
   @spec cat(Parser.t, Parser.t) :: Parser.t
   def cat(parser1, parser2) do
-    fn(input) ->
-      with %Parser.Success{
-            result: result1,
-            remaining: remaining1} <- parser1.(input),
-           %Parser.Success{
-             result: result2,
-             remaining: remaining2} <- parser2.(remaining1) do
-        %Parser.Success{result: result1 <> result2, remaining: remaining2}
-      else
-        %Parsex.Parser.Failure{} = e -> e
-      end
-    end
+    # fn(input) ->
+    memo(
+    bind(parser1, fn(result1) ->
+      bind(parser2, fn(result2) ->
+        eps(result1 <> result2)
+      end)
+    end)
+    )
+
+    # with %Parser.Success{
+    #       result: result1,
+    #       remaining: remaining1} <- parser1.(input),
+    #      %Parser.Success{
+    #        result: result2,
+    #        remaining: remaining2} <- parser2.(remaining1) do
+    #   %Parser.Success{result: result1 <> result2, remaining: remaining2}
+    # else
+    #   %Parsex.Parser.Failure{} = e -> e
+    # end
+    # end
   end
 
   @doc """
@@ -140,6 +148,7 @@ defmodule Parsex do
 
   @doc """
   Creates a parser that succeeds if one of its subparsers succeeds
+
       iex> p1 = str("foo")
       iex> p2 = str("bar")
       iex> foo_and_bar = ord(p1, p2)
@@ -218,5 +227,46 @@ defmodule Parsex do
     quote do
       then(unquote(parser1), unquote(function))
     end
+  end
+
+  @doc """
+  A wrapper to provide a monadic bind, like Elixir's `with`.
+  """
+  @spec bind(Parser.t, (term -> Parser.t)) :: Parser.t
+  defp bind(parser, function) do
+    fn(input) ->
+      with %Parser.Success{result: result, remaining: remaining} <- parser.(input) do
+        function.(result).(remaining)
+      end
+    end
+  end
+
+
+  @doc """
+  A simple to memoize the execution of a parser.
+  Uses `Agent` to simulate mutable state.
+  """
+  @spec memo((term -> term)) :: (term -> term)
+  def memo(function) do
+    {:ok, agent} = Agent.start_link(fn() -> %{} end)
+    fn(args) ->
+      memo(agent, function, args)
+    end
+  end
+
+  @spec memo(pid, (term -> term), term) :: term
+  def memo(agent, function, args) do
+    Agent.get_and_update(
+      agent,
+      fn(m) ->
+        case Map.fetch(m, args) do
+          :error ->
+            result = function.(args)
+            {result, Map.put(m, args, result )}
+          {:ok, value} ->
+            {value, m}
+        end
+      end
+    )
   end
 end
