@@ -50,6 +50,20 @@ defmodule Parsex do
   end
 
   @doc """
+  Create the epsilon parser, that always succeeds, returning its given value.
+
+      iex> an_eps = eps("an eps")
+      iex> an_eps.("some input")
+      %Parsex.Parser.Success{result: "an eps", remaining: "some input"}
+  """
+  @spec eps(String.t) :: Parser.t
+  def eps(val \\ "") do
+    fn(input) ->
+      %Parser.Success{result: val, remaining: input}
+    end
+  end
+
+  @doc """
   Create a parser from a regular expression
 
       iex> foo = re(~r/foo/)
