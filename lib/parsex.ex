@@ -91,24 +91,24 @@ defmodule Parsex do
 
       iex> p1 = str("foo")
       iex> p2 = str("bar")
-      iex> foo_and_bar = andd(p1, p2)
+      iex> foo_and_bar = cat(p1, p2)
       iex> foo_and_bar.("foobar")
       %Parsex.Parser.Success{result: "foobar", remaining: ""}
 
       iex> p1 = str("foo")
       iex> p2 = str("bar")
-      iex> foo_and_bar = andd(p1, p2)
+      iex> foo_and_bar = cat(p1, p2)
       iex> foo_and_bar.("foobaz")
       %Parsex.Parser.Failure{parse_string: "bar", remaining: "baz"}
 
       iex> p1 = str("foo")
       iex> p2 = str("bar")
-      iex> foo_and_bar = andd(p1, p2)
+      iex> foo_and_bar = cat(p1, p2)
       iex> foo_and_bar.("qoobar")
       %Parsex.Parser.Failure{parse_string: "foo", remaining: "qoobar"}
   """
-  @spec andd(Parser.t, Parser.t) :: Parser.t
-  def andd(parser1, parser2) do
+  @spec cat(Parser.t, Parser.t) :: Parser.t
+  def cat(parser1, parser2) do
     fn(input) ->
       with %Parser.Success{
             result: result1,
@@ -124,7 +124,7 @@ defmodule Parsex do
   end
 
   @doc """
-  Macro sugar for `andd/2`
+  Macro sugar for `cat/2`
 
       iex> p1 = str("foo")
       iex> p2 = str("bar")
@@ -134,7 +134,7 @@ defmodule Parsex do
   """
   defmacro parser1 <~> parser2 do
     quote do
-      andd(unquote(parser1), unquote(parser2))
+      cat(unquote(parser1), unquote(parser2))
     end
   end
 
