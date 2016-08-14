@@ -24,6 +24,8 @@ defmodule Parsex do
     end
   end
 
+  use Parsex.DefParser
+
   @doc """
   Create a parser from a `String.t`.
 
@@ -36,7 +38,7 @@ defmodule Parsex do
       %Parsex.Parser.Failure{parse_string: "foo", remaining: "baz quux"}
   """
   @spec str(String.t) :: Parser.t
-  def str(prefix) do
+  defparser str(prefix) do
     fn(input) ->
       case String.starts_with?(input, prefix) do
         true ->
@@ -46,7 +48,7 @@ defmodule Parsex do
         false ->
           %Parser.Failure{parse_string: prefix, remaining: input}
       end
-    end
+    end |> memo
   end
 
   @doc """
@@ -57,10 +59,10 @@ defmodule Parsex do
       %Parsex.Parser.Success{result: "an eps", remaining: "some input"}
   """
   @spec eps(String.t) :: Parser.t
-  def eps(val \\ "") do
+  defparser eps(val \\ "") do
     fn(input) ->
       %Parser.Success{result: val, remaining: input}
-    end
+    end |> memo
   end
 
   @doc """
@@ -75,7 +77,7 @@ defmodule Parsex do
       %Parsex.Parser.Failure{parse_string: "foo", remaining: "bar baz"}
   """
   @spec re(String.t) :: Parser.t
-  def re(regex) do
+  defparser re(regex) do
     fn(input) ->
       case Regex.run(regex, input) do
         [matches] ->
@@ -83,7 +85,7 @@ defmodule Parsex do
           %Parser.Success{result: matches, remaining: remaining}
         nil -> %Parser.Failure{parse_string: regex.source, remaining: input}
       end
-    end
+    end |> memo
   end
 
   @doc """
@@ -108,19 +110,12 @@ defmodule Parsex do
       %Parsex.Parser.Failure{parse_string: "foo", remaining: "qoobar"}
   """
   @spec cat(Parser.t, Parser.t) :: Parser.t
-  def cat(parser1, parser2) do
-    fn(input) ->
-      with %Parser.Success{
-            result: result1,
-            remaining: remaining1} <- parser1.(input),
-           %Parser.Success{
-             result: result2,
-             remaining: remaining2} <- parser2.(remaining1) do
-        %Parser.Success{result: result1 <> result2, remaining: remaining2}
-      else
-        %Parsex.Parser.Failure{} = e -> e
-      end
-    end
+  defparser cat(parser1, parser2) do
+    bind(parser1, fn(result1) ->
+      bind(parser2, fn(result2) ->
+        eps(result1 <> result2)
+      end)
+    end) |> memo
   end
 
   @doc """
@@ -140,6 +135,7 @@ defmodule Parsex do
 
   @doc """
   Creates a parser that succeeds if one of its subparsers succeeds
+
       iex> p1 = str("foo")
       iex> p2 = str("bar")
       iex> foo_and_bar = ord(p1, p2)
@@ -159,14 +155,14 @@ defmodule Parsex do
       %Parsex.Parser.Failure{parse_string: "bar", remaining: "bazquux"}
   """
   @spec ord(Parser.t, Parser.t) :: Parser.t
-  def ord(parser1, parser2) do
+  defparser ord(parser1, parser2) do
     fn(input) ->
       with %Parser.Success{} = s <- parser1.(input) do
         s
       else
         %Parsex.Parser.Failure{} -> parser2.(input)
       end
-    end
+    end |> memo
   end
 
   @doc """
@@ -197,14 +193,14 @@ defmodule Parsex do
       %Parsex.Parser.Failure{parse_string: "foo", remaining: "quux"}
   """
   @spec then(Parser.t, (String.t -> term)) :: Parser.t
-  def then(parser, function) do
+  defparser then(parser, function) do
     fn(input) ->
       case parser.(input) do
         %Parser.Success{result: result, remaining: remaining} ->
           %Parser.Success{result: function.(result), remaining: remaining}
         %Parser.Failure{} = e -> e
       end
-    end
+    end |> memo
   end
 
   @doc """
@@ -217,6 +213,40 @@ defmodule Parsex do
   defmacro parser1 ~>> function do
     quote do
       then(unquote(parser1), unquote(function))
+    end
+  end
+
+  @doc """
+  A wrapper to provide a monadic bind, like Elixir's `with`.
+  """
+  @spec bind(Parser.t, (term -> Parser.t)) :: Parser.t
+  defp bind(parser, function) do
+    fn(input) ->
+      with %Parser.Success{result: result, remaining: remaining} <- parser.(input) do
+        function.(result).(remaining)
+      end
+    end
+  end
+
+  @doc """
+  A simple to memoize the execution of a parser.
+  Uses `Agent` to simulate mutable state.
+  """
+  @spec memo(fun) :: (term -> term)
+  def memo(function) do
+    {:ok, agent} = Agent.start_link(fn() -> %{} end)
+
+    fn(args) ->
+      Agent.get_and_update(
+        agent,
+        fn(state) ->
+          case Map.fetch(state, args) do
+            :error ->
+              result = function.(args)
+              {result, Map.put(state, args, result)}
+            {:ok, value} -> {value, state}
+          end
+        end)
     end
   end
 end
