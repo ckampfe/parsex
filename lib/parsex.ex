@@ -142,24 +142,24 @@ defmodule Parsex do
   Creates a parser that succeeds if one of its subparsers succeeds
       iex> p1 = str("foo")
       iex> p2 = str("bar")
-      iex> foo_and_bar = orr(p1, p2)
+      iex> foo_and_bar = ord(p1, p2)
       iex> foo_and_bar.("foo")
       %Parsex.Parser.Success{result: "foo", remaining: ""}
 
       iex> p1 = str("foo")
       iex> p2 = str("bar")
-      iex> foo_and_bar = orr(p1, p2)
+      iex> foo_and_bar = ord(p1, p2)
       iex> foo_and_bar.("bar")
       %Parsex.Parser.Success{result: "bar", remaining: ""}
 
       iex> p1 = str("foo")
       iex> p2 = str("bar")
-      iex> foo_and_bar = orr(p1, p2)
+      iex> foo_and_bar = ord(p1, p2)
       iex> foo_and_bar.("bazquux")
       %Parsex.Parser.Failure{parse_string: "bar", remaining: "bazquux"}
   """
-  @spec orr(Parser.t, Parser.t) :: Parser.t
-  def orr(parser1, parser2) do
+  @spec ord(Parser.t, Parser.t) :: Parser.t
+  def ord(parser1, parser2) do
     fn(input) ->
       with %Parser.Success{} = s <- parser1.(input) do
         s
@@ -170,7 +170,7 @@ defmodule Parsex do
   end
 
   @doc """
-  Macro sugar for `orr/2`
+  Macro sugar for `ord/2`
 
       iex> p1 = str("foo")
       iex> p2 = str("bar")
@@ -180,7 +180,7 @@ defmodule Parsex do
   """
   defmacro parser1 <|> parser2 do
     quote do
-      orr(unquote(parser1), unquote(parser2))
+      ord(unquote(parser1), unquote(parser2))
     end
   end
 
